@@ -1,16 +1,21 @@
-[tool.poetry]
-name = "ciencia-de-dados"
+[project]
+name = "trab4"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = [
+    {name = "hick-hpe",email = "hpalermoemerick@gmail.com"}
+]
 readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit (>=1.50.0,<2.0.0)",
+    "pandas (>=2.3.3,<3.0.0)",
+    "plotly (>=6.3.1,<7.0.0)"
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-streamlit = "^1.50.0"
-pandas = "^2.3.3"
-
+[tool.poetry]
+packages = [{include = "trab4", from = "src"}]
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"

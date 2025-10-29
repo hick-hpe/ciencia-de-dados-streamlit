@@ -9,28 +9,45 @@ Ela contém informações detalhadas sobre os jogos disponíveis, incluindo tít
 
 O projeto busca explorar o mercado de jogos da Steam por meio de perguntas que possam revelar padrões, tendências e relações entre preço, popularidade e qualidade dos jogos.
 
-## Perguntas principais:
 
-<!-- ### Descritivas
-- Quais são os gêneros mais comuns na Steam?
-- Quais publishers e desenvolvedores publicam mais jogos?
-- Quais categorias (ex: "Multiplayer", "Single Player") são mais populares?
+## Principais Análises Realizadas:
 
-### Econômicas / Comerciais
-- Jogos com maiores descontos (`discount_percentage`) têm melhores avaliações (`overall_review_%`)?
-- Jogos com DLCs tendem a ser mais caros?
+### Visçao Geral
+- Top 5 jogos mais populares pela quantidade de avaliações.
+- Gêneros mais comuns na Steam.
+- Publishers com mais jogos publicados.
+- Categorias mais populares (ex: "Multiplayer", "Single Player").
 
-### Avaliações
-- Desenvolvedores com mais jogos publicados tendem a manter qualidade constante?
+### Avaliações e Descontos
+- Correlação entre descontos e avaliações gerais (comentado - no código, pode ser ativado futuramente).
+- Evolução dos descontos médios por ano de lançamento:
+    - De 1997 a 2005, não havia descontos registrados.
+    - A partir de 2006, os descontos médios variam entre 3% e 8%.
+    - Lançamentos recentes não apresentam descontos significativamente maiores que os mais antigos
 
-### Tendências ao longo dos anos
-- Quais gêneros estão crescendo ou diminuindo em lançamentos?
-- Os jogos lançados recentemente têm mais ou menos descontos? -->
+### Tendências
 
-<!-- arrumar reademe.md -->
+- Gêneros em crescimento ou declínio nos últimos lançamentos (últimos 3 anos analisados), com gráfico de evolução por ano.
+- Desenvolvedores com mais jogos publicados e média de avaliação de seus jogos.
+
+### Filtros Interativos
+
+- Selecionar jogos específicos.
+- Filtrar por faixa de preço.
+- Filtrar por avaliação mínima (%).
+- Filtrar por gênero.
+- Filtrar por conteúdo (idade, descriptors).
+- Filtrar por ano de lançamento.
 
 ## Como Executar o Projeto
 
-```bash
-poetry run streamlit run src/app.py
-```
+- Instalar as dependências:
+    ```bash
+    poetry install
+    ```
+- Iniciar o servidor Streamlit
+    ```bash
+    poetry run streamlit run src/app.py
+    ```
+
+O servidor estará disponível em [http://localhost:8501/](http://localhost:8501/)

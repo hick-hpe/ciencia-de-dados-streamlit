@@ -36,7 +36,8 @@ def tratar_campos():
     base['discount_percentage'] = base['discount_percentage'].fillna('0%')
     base['discount_percentage'] = base['discount_percentage'].astype(str).str.strip()
     base['discount_percentage'] = base['discount_percentage'].replace(['', 'None'], '0%')
-    base['discount_percentage'] = base['discount_percentage'].str.replace('%', '', regex=False).astype(float)
+    base['discount_percentage'] = base['discount_percentage'].str.replace('%', '', regex=False).astype(float).abs()
+    print('list_discount: ', base['discount_percentage'])
 
     # tratar colunas de avaliações
     base['recent_review_count'] = pd.to_numeric(base['recent_review_count'], errors='coerce').fillna(0).astype(int)

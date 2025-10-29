@@ -10,8 +10,6 @@ st.set_page_config(page_title="Steam Games Dashboard", layout="wide")
 st.title("Steam Games Data Dashboard")
 st.write(f'Esta base de dados é referente à plataforma **Steam**, uma das maiores lojas digitais de jogos para PC. Ela contém informações detalhadas sobre os jogos disponíveis, incluindo título, data de lançamento, gênero, desenvolvedor, preço, avaliações, suporte a sistemas operacionais e muito mais.')
 
-# st.write("Colunas disponíveis:", base.columns.tolist())
-
 
 # ================================================ VISÃO GERAL ================================================
 st.header("Visão Geral dos Jogos")
@@ -122,20 +120,20 @@ st.subheader("Desenvolvedores com mais jogos publicados e avaliação média")
 # contar jogos por developer
 dev_counts = base['developer'].value_counts()
 
-# pegar top 10 desenvolvedores
-top10_devs = dev_counts.nlargest(10).index
+# pegar top 5 desenvolvedores
+top5_devs = dev_counts.nlargest(5).index
 
 # calcular média de avaliação para esses devs
-media_avaliacao = base.groupby('developer')['overall_review_%'].mean().loc[top10_devs]
+media_avaliacao = base.groupby('developer')['overall_review_%'].mean().loc[top5_devs]
 
 # criar DataFrame para exibir
 df_dev = pd.DataFrame({
-    'Jogos Publicados': dev_counts.loc[top10_devs],
+    'Jogos Publicados': dev_counts.loc[top5_devs],
     'Avaliação Média (%)': media_avaliacao
 })
 
 # exibir tabela
-st.write("Top 10 desenvolvedores por número de jogos")
+st.write("Top 5 desenvolvedores por número de jogos")
 st.dataframe(df_dev)
 
 # gráfico de barras para Avaliação Média
@@ -151,18 +149,26 @@ base['release_date'] = pd.to_datetime(base['release_date'], errors='coerce')
 # filtrar dados válidos
 df_desconto = base[['title', 'release_date', 'discount_percentage']].dropna()
 
-# agrupar por ano de lançamento
+# criar coluna de ano de lançamento
 df_desconto['ano_lancamento'] = df_desconto['release_date'].dt.year
+
+# agrupar por ano: mínimo, médio e máximo
 desconto_ano = df_desconto.groupby('ano_lancamento')['discount_percentage'].mean()
 
 # exibir tabela
-st.write("Desconto médio por ano de lançamento")
+st.write("Desconto por ano de lançamento (mínimo, médio e máximo)")
 st.dataframe(desconto_ano)
 
-# gráfico
+# gráfico interativo com Streamlit
 st.line_chart(desconto_ano)
 
-st.write('Os jogos lançados mais recentemente não têm descontos maiores que os lançamentos mais antigos recentes; a média de desconto se mantém relativamente estável.')
+st.write(
+    "Observação: De 1997 a 2005, os jogos não apresentavam descontos registrados. "
+    "A partir de 2006, surgem descontos médios entre 3% e 8%, com leve variação ao longo dos anos. "
+    "Os lançamentos mais recentes não apresentam descontos significativamente maiores que os mais antigos, "
+    "indicando que a média de desconto se mantém relativamente estável ao longo do tempo."
+)
+
 
 # ================================================ FILTROS ================================================
 st.header("Fitro dos Jogos")
@@ -181,16 +187,66 @@ if jogos_selecionados:
 else:
     jogos_filtrados = base_exibir
 
-# filtro faixa de preços
-preco_min, preco_max = st.slider("Faixa de preço (R$)", 0, 500, (0, 100))
-jogos_filtrados = jogos_filtrados[(jogos_filtrados['original_price'] >= preco_min) & 
-                                  (jogos_filtrados['original_price'] <= preco_max)]
+# --------------------- filtro de faixa de preços ---------------------
+# pegar mínimo e máximo da base
+preco_min_df, preco_max_df = int(base['original_price'].min()), 5000
+print(f'Faixa de preço (R$): {(preco_min_df, preco_max_df)}')
+
+# slider com limites baseados nos dados
+preco_min, preco_max = st.slider(
+    "Faixa de preço (R$)",
+    min_value=preco_min_df,
+    max_value=preco_max_df,
+    value=(preco_min_df, preco_max_df)
+)
+
+# filtrar jogos pela faixa de preço
+jogos_filtrados = jogos_filtrados[
+    (jogos_filtrados['original_price'] >= preco_min) & 
+    (jogos_filtrados['original_price'] <= preco_max)
+]
+
+# exibir quantidade de jogos encontrados
 num_jogos_encontrados = jogos_filtrados.shape[0]
 st.write(f'Jogos encontrados nessa faixa de preço: {num_jogos_encontrados}')
 
 # filtro por avaliação geral
 avaliacao_min = st.slider("Avaliação mínima (%)", 0, 100, 50)
 jogos_filtrados = jogos_filtrados[jogos_filtrados['overall_review_%'] >= avaliacao_min]
+
+# filtro por gênero ou categoria
+generos = base['genres'].str.split(',').explode().str.strip().unique()
+generos_selecionados = st.multiselect("Filtrar por gênero", generos)
+
+if generos_selecionados:
+    jogos_filtrados = jogos_filtrados[jogos_filtrados['genres'].str.contains('|'.join(generos_selecionados))]
+
+# filtro por conteúdo (idade, descriptor)
+conteudos = base['content_descriptor'].unique()
+conteudo_selecionado = st.multiselect("Filtrar por conteúdo", conteudos)
+
+if conteudo_selecionado:
+    jogos_filtrados = jogos_filtrados[jogos_filtrados['content_descriptor'].isin(conteudo_selecionado)]
+
+# filtro por ano de lançamento
+# garantir que release_date seja datetime
+base['release_date'] = pd.to_datetime(base['release_date'], errors='coerce')
+
+# extrair o ano
+base['ano_lancamento'] = base['release_date'].dt.year
+
+# agora você pode usar o slider
+ano_min, ano_max = st.slider(
+    "Ano de lançamento",
+    int(base['ano_lancamento'].min()),
+    int(base['ano_lancamento'].max()),
+    (2010, 2025)
+)
+
+# filtrar
+jogos_filtrados = jogos_filtrados[
+    jogos_filtrados['release_date'].dt.year.between(ano_min, ano_max)
+]
 
 # exibir tabela
 st.dataframe(jogos_filtrados)
